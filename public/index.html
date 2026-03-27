@@ -1,1 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal File Converter | Convert Any Format</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div class="container mx-auto px-4 py-8 max-w-5xl">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">
+        <i class="fas fa-exchange-alt text-blue-500 mr-2"></i>
+        Universal File Converter
+      </h1>
+      <p class="text-gray-600 dark:text-gray-300">Convert documents, images, audio, video, archives – 50+ formats supported</p>
+    </header>
 
+    <!-- Main Converter Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 mb-8">
+      <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition" id="dropzone">
+        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+        <p class="text-gray-600 dark:text-gray-300">Drag & drop your file here, or <label class="text-blue-500 cursor-pointer hover:underline">browse</label></p>
+        <input type="file" id="fileInput" class="hidden" accept="*/*">
+        <p class="text-xs text-gray-400 mt-2">Maximum file size: 500MB</p>
+      </div>
+
+      <div class="mt-6 grid md:grid-cols-2 gap-6">
+        <!-- Selected file info -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Selected file</label>
+          <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3" id="fileInfo">
+            <span class="text-gray-500">No file chosen</span>
+          </div>
+        </div>
+
+        <!-- Target format dropdown -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Convert to</label>
+          <select id="targetFormat" class="w-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Select format</option>
+            <optgroup label="Documents">
+              <option value="pdf">PDF</option>
+              <option value="docx">DOCX (Word)</option>
+              <option value="txt">TXT</option>
+              <option value="html">HTML</option>
+            </optgroup>
+            <optgroup label="Images">
+              <option value="jpg">JPG</option>
+              <option value="png">PNG</option>
+              <option value="webp">WEBP</option>
+              <option value="gif">GIF</option>
+              <option value="bmp">BMP</option>
+            </optgroup>
+            <optgroup label="Audio">
+              <option value="mp3">MP3</option>
+              <option value="wav">WAV</option>
+              <option value="ogg">OGG</option>
+              <option value="flac">FLAC</option>
+            </optgroup>
+            <optgroup label="Video">
+              <option value="mp4">MP4</option>
+              <option value="avi">AVI</option>
+              <option value="mov">MOV</option>
+              <option value="mkv">MKV</option>
+              <option value="webm">WEBM</option>
+            </optgroup>
+            <optgroup label="Archives">
+              <option value="zip">ZIP</option>
+              <option value="tar">TAR</option>
+              <option value="gz">GZ</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <button id="convertBtn" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50" disabled>
+        <i class="fas fa-sync-alt mr-2"></i> Convert
+      </button>
+
+      <div id="progress" class="mt-4 hidden">
+        <div class="bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p class="text-sm text-gray-500 mt-1 text-center">Converting...</p>
+      </div>
+
+      <div id="result" class="mt-4 hidden">
+        <a href="#" id="downloadLink" class="block text-center bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 py-2 rounded-lg hover:underline">
+          <i class="fas fa-download mr-2"></i> Download converted file
+        </a>
+      </div>
+    </div>
+
+    <!-- PDF Tools Section (from your image) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center shadow">
+        <i class="fas fa-file-pdf text-2xl text-red-500 mb-2"></i>
+        <h3 class="font-semibold">Merge PDFs</h3>
+        <p class="text-xs text-gray-500">Combine multiple PDFs</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center shadow">
+        <i class="fas fa-cut text-2xl text-red-500 mb-2"></i>
+        <h3 class="font-semibold">Split PDF</h3>
+        <p class="text-xs text-gray-500">Extract pages</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center shadow">
+        <i class="fas fa-compress-alt text-2xl text-red-500 mb-2"></i>
+        <h3 class="font-semibold">Compress PDF</h3>
+        <p class="text-xs text-gray-500">Reduce file size</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 text-center shadow">
+        <i class="fas fa-lock text-2xl text-red-500 mb-2"></i>
+        <h3 class="font-semibold">Add Password</h3>
+        <p class="text-xs text-gray-500">Protect PDF</p>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="mt-12 bg-gray-100 dark:bg-gray-800 rounded-xl p-6">
+      <h2 class="text-xl font-bold mb-4">Frequently Asked Questions</h2>
+      <div class="space-y-3">
+        <div>
+          <p class="font-semibold">Is it really free?</p>
+          <p class="text-gray-600 dark:text-gray-400">Yes, all conversions are completely free with no hidden costs or subscriptions.</p>
+        </div>
+        <div>
+          <p class="font-semibold">Are my files secure?</p>
+          <p class="text-gray-600 dark:text-gray-400">Absolutely. Files are deleted immediately after conversion. No data is stored permanently.</p>
+        </div>
+        <div>
+          <p class="font-semibold">Which formats are supported?</p>
+          <p class="text-gray-600 dark:text-gray-400">Documents (PDF, DOCX, TXT), Images (JPG, PNG, WEBP, GIF), Audio (MP3, WAV, OGG, FLAC), Video (MP4, AVI, MOV, MKV), Archives (ZIP, TAR, GZ). More coming soon.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const targetFormat = document.getElementById('targetFormat');
+    const convertBtn = document.getElementById('convertBtn');
+    const progressDiv = document.getElementById('progress');
+    const resultDiv = document.getElementById('result');
+    const downloadLink = document.getElementById('downloadLink');
+    const progressBar = progressDiv.querySelector('.bg-blue-600');
+
+    let selectedFile = null;
+
+    // Drag & drop handlers
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-blue-500', 'bg-blue-50');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    dropzone.querySelector('label').addEventListener('click', () => fileInput.click());
+
+    function handleFile(file) {
+      selectedFile = file;
+      fileInfo.innerHTML = `
+        <div class="flex items-center">
+          <i class="fas fa-file text-gray-500 mr-2"></i>
+          <span class="font-medium">${file.name}</span>
+          <span class="ml-2 text-xs text-gray-500">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+        </div>
+      `;
+      convertBtn.disabled = false;
+      resultDiv.classList.add('hidden');
+    }
+
+    convertBtn.addEventListener('click', async () => {
+      if (!selectedFile || !targetFormat.value) {
+        alert('Please select a file and target format.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('targetFormat', targetFormat.value);
+
+      convertBtn.disabled = true;
+      progressDiv.classList.remove('hidden');
+      resultDiv.classList.add('hidden');
+      progressBar.style.width = '0%';
+
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/convert', true);
+        xhr.responseType = 'blob';
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressBar.style.width = percent + '%';
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const blob = xhr.response;
+            const url = URL.createObjectURL(blob);
+            downloadLink.href = url;
+            downloadLink.download = `converted.${targetFormat.value}`;
+            resultDiv.classList.remove('hidden');
+          } else {
+            alert('Conversion failed. Please try again.');
+          }
+          convertBtn.disabled = false;
+          progressDiv.classList.add('hidden');
+        };
+
+        xhr.onerror = () => {
+          alert('Network error. Please check your connection.');
+          convertBtn.disabled = false;
+          progressDiv.classList.add('hidden');
+        };
+
+        xhr.send(formData);
+      } catch (err) {
+        alert('Error: ' + err.message);
+        convertBtn.disabled = false;
+        progressDiv.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
