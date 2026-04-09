@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Universal Converter Pro | Full Suite: DOCX, Excel, PDF, MP4→MP3</title>
+  <title>Universal Converter Pro | DOCX to PDF · Excel to PDF · MP4 to MP3</title>
   <!-- Core libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -42,14 +42,13 @@
     .preview-img, .preview-video { max-width: 100%; max-height: 180px; border-radius: 12px; object-fit: contain; background: #00000055; margin-top: 8px; }
     .log-area { background: #071018; border-radius: 1rem; padding: 0.8rem; font-family: monospace; font-size: 0.75rem; color: #9fc7e0; max-height: 200px; overflow: auto; white-space: pre-wrap; }
     .quality-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
-    hr { border-color: #1e3442; margin: 1rem 0; }
   </style>
 </head>
 <body>
 <div class="app-container">
   <header>
     <h1>⚡ Universal Converter <span class="badge">Pro Suite</span></h1>
-    <div class="sub">DOCX → PDF · Excel → PDF · Image → PDF · MP4 → MP3 · GIF Studio · Video/Audio</div>
+    <div class="sub">DOCX → PDF · Excel → PDF · Image → PDF · MP4 → MP3 · GIF Studio</div>
   </header>
   <div class="tabs">
     <button class="tab-btn active" data-tab="image">🖼️ Image</button>
@@ -58,7 +57,7 @@
     <button class="tab-btn" data-tab="gif">🎞️ GIF Studio</button>
   </div>
 
-  <!-- ====================== IMAGE TAB ====================== -->
+  <!-- Image Tab -->
   <div id="imageTab" class="tab-content active">
     <div class="drop-zone" id="imageDropZone">📁 Drop image (WEBP, PNG, JFIF, HEIC, JPG) → Convert to PNG/JPEG/WEBP</div>
     <input type="file" id="imageInput" accept="image/*, .heic, .heif" style="display:none">
@@ -72,7 +71,7 @@
     </div>
   </div>
 
-  <!-- ====================== PDF & DOCUMENTS (DOCX, Excel, Image to PDF) ====================== -->
+  <!-- PDF & Documents Tab (includes DOCX to PDF and Excel to PDF) -->
   <div id="pdfTab" class="tab-content">
     <div class="drop-zone" id="pdfDropZone">📄 Drop file: PDF, DOCX, XLSX, JPG, PNG, HEIC</div>
     <input type="file" id="pdfInput" style="display:none" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.heic,.heif">
@@ -92,7 +91,7 @@
     </div>
   </div>
 
-  <!-- ====================== VIDEO & AUDIO (MP4 → MP3 added) ====================== -->
+  <!-- Video & Audio Tab (MP4 to MP3 added) -->
   <div id="videoTab" class="tab-content">
     <div class="drop-zone" id="videoDropZone">🎥 Drop video/audio (MP4, MOV, MP3, OGG)</div>
     <input type="file" id="videoInput" style="display:none" accept="video/mp4,video/quicktime,audio/mpeg,audio/ogg">
@@ -111,7 +110,7 @@
     </div>
   </div>
 
-  <!-- ====================== GIF STUDIO ====================== -->
+  <!-- GIF Studio Tab -->
   <div id="gifTab" class="tab-content">
     <div class="drop-zone" id="gifDropZone">🎞️ Drop MP4, WEBM, GIF, APNG, or image</div>
     <input type="file" id="gifInput" style="display:none" accept="video/mp4,video/webm,image/gif,image/png,image/jpeg,image/apng">
@@ -135,7 +134,7 @@
   function downloadBlob(blob, filename) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
   function showStatus(elem, msg) { if(elem) elem.innerText = msg; }
 
-  // ---------------------- IMAGE (unchanged but working) ----------------------
+  // ---------------------- IMAGE ----------------------
   let currentImageFile = null;
   const imageZone = document.getElementById('imageDropZone');
   const imageInput = document.getElementById('imageInput');
@@ -173,7 +172,7 @@
   });
   document.getElementById('imgQuality').addEventListener('input', e => document.getElementById('qualVal').innerText = Math.round(e.target.value*100)+'%');
 
-  // ---------------------- PDF & DOCUMENTS (Enhanced with DOCX, Excel) ----------------------
+  // ---------------------- PDF & DOCUMENTS (DOCX to PDF, Excel to PDF) ----------------------
   let currentDocFile = null;
   const pdfZone = document.getElementById('pdfDropZone');
   const pdfFileInput = document.getElementById('pdfInput');
@@ -182,7 +181,6 @@
   pdfZone.addEventListener('dragover', e => e.preventDefault());
   pdfZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) { currentDocFile = f; showStatus(document.getElementById('pdfPreview'), `Dropped: ${f.name}`); } });
 
-  // Helper: Convert HTML element to PDF using html2canvas + jsPDF
   async function htmlToPdf(htmlElement, filename) {
     const canvas = await html2canvas(htmlElement, { scale: 2 });
     const imgData = canvas.toDataURL('image/png');
@@ -217,15 +215,12 @@
       statusDiv.innerText = `Exported ${pdf.numPages} pages as JPG.`;
     } 
     else if (action === 'jpgToPdf') {
-      // Image to PDF (supports JPG, PNG, HEIC)
       let imgBlob = currentDocFile;
       if (currentDocFile.name.match(/\.(heic|heif)$/i)) imgBlob = await heic2any({ blob: currentDocFile, toType: 'image/jpeg' });
       const { PDFDocument } = PDFLib;
       const pdfDoc = await PDFDocument.create();
       const imageBytes = await imgBlob.arrayBuffer();
-      let imageEmbed;
-      if (imgBlob.type === 'image/jpeg') imageEmbed = await pdfDoc.embedJpg(imageBytes);
-      else imageEmbed = await pdfDoc.embedPng(imageBytes);
+      let imageEmbed = imgBlob.type === 'image/jpeg' ? await pdfDoc.embedJpg(imageBytes) : await pdfDoc.embedPng(imageBytes);
       const page = pdfDoc.addPage([imageEmbed.width, imageEmbed.height]);
       page.drawImage(imageEmbed, { x: 0, y: 0, width: imageEmbed.width, height: imageEmbed.height });
       const pdfBytes = await pdfDoc.save();
@@ -237,14 +232,12 @@
       statusDiv.innerText = 'Converting DOCX to PDF...';
       const arrayBuffer = await currentDocFile.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const htmlContent = result.value;
-      // Create temporary container
       const container = document.createElement('div');
       container.style.padding = '20px';
       container.style.backgroundColor = 'white';
       container.style.color = 'black';
       container.style.fontFamily = 'Arial, sans-serif';
-      container.innerHTML = htmlContent;
+      container.innerHTML = result.value;
       document.body.appendChild(container);
       await htmlToPdf(container, 'docx_to_pdf.pdf');
       document.body.removeChild(container);
@@ -284,7 +277,7 @@
     }
   });
 
-  // ---------------------- VIDEO & AUDIO (MP4 to MP3 using lamejs) ----------------------
+  // ---------------------- VIDEO & AUDIO (MP4 to MP3) ----------------------
   let currentMediaFile = null;
   const videoZone = document.getElementById('videoDropZone');
   const videoFileInput = document.getElementById('videoInput');
@@ -294,15 +287,13 @@
   videoZone.addEventListener('dragover', e => e.preventDefault());
   videoZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f && (f.type.startsWith('video/') || f.type.startsWith('audio/'))) { currentMediaFile = f; videoPreview.src = URL.createObjectURL(f); videoPreview.load(); } });
 
-  // Convert AudioBuffer to MP3 using lamejs
   function audioBufferToMp3(audioBuffer) {
     const numChannels = audioBuffer.numberOfChannels;
     const sampleRate = audioBuffer.sampleRate;
     const samples = audioBuffer.getChannelData(0);
-    const sampleBlockSize = 1152;
     const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 128);
     const mp3Data = [];
-    let remaining = samples.length;
+    const sampleBlockSize = 1152;
     for (let i = 0; i < samples.length; i += sampleBlockSize) {
       const chunk = samples.slice(i, i + sampleBlockSize);
       const sampleInts = new Int16Array(chunk.length);
@@ -326,7 +317,8 @@
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    return audioBufferToWav(audioBuffer);
+    const wavBuffer = audioBufferToWav(audioBuffer);
+    return new Blob([wavBuffer], { type: 'audio/wav' });
   }
 
   function audioBufferToWav(buffer) {
@@ -348,13 +340,10 @@
     return new Promise(async (resolve) => {
       const video = document.createElement('video');
       const url = URL.createObjectURL(file);
-      video.src = url;
-      video.muted = true;
-      video.autoplay = true;
+      video.src = url; video.muted = true; video.autoplay = true;
       await video.play();
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       const stream = canvas.captureStream(30);
       const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
       let chunks = [];
@@ -362,17 +351,13 @@
       recorder.onstop = () => { resolve(new Blob(chunks, {type: 'video/mp4'})); URL.revokeObjectURL(url); };
       recorder.start();
       const ctx = canvas.getContext('2d');
-      const drawFrame = () => {
-        if(!video.paused && !video.ended) { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); requestAnimationFrame(drawFrame); }
-        else recorder.stop();
-      };
+      const drawFrame = () => { if(!video.paused && !video.ended) { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); requestAnimationFrame(drawFrame); } else recorder.stop(); };
       drawFrame();
       setTimeout(() => { if(video.duration && !isNaN(video.duration)) video.pause(); }, video.duration * 1000);
     });
   }
 
   async function mp3ToOgg(file) {
-    // Convert MP3 to OGG via Web Audio + MediaRecorder (Opus)
     const audioContext = new AudioContext();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -421,7 +406,7 @@
     } catch(e) { logDiv.innerText = 'Error: ' + e.message; alert('Conversion error'); }
   });
 
-  // ---------------------- GIF STUDIO (working as before) ----------------------
+  // ---------------------- GIF STUDIO ----------------------
   let currentGifFile = null;
   const gifZone = document.getElementById('gifDropZone');
   const gifFileInput = document.getElementById('gifInput');
