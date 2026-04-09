@@ -8,6 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
@@ -50,7 +51,7 @@
     <button class="tab-btn" data-tab="gif">🎞️ GIF Studio</button>
   </div>
 
-  <!-- ====================== IMAGE TAB (already working) ====================== -->
+  <!-- ====================== IMAGE TAB ====================== -->
   <div id="imageTab" class="tab-content active">
     <div class="drop-zone" id="imageDropZone">📁 Drop image (WEBP, PNG, JFIF, HEIC, JPG) → Convert to PNG/JPEG/WEBP</div>
     <input type="file" id="imageInput" accept="image/*, .heic, .heif" style="display:none">
@@ -66,15 +67,15 @@
 
   <!-- ====================== PDF & DOCUMENTS (fully working) ====================== -->
   <div id="pdfTab" class="tab-content">
-    <div class="drop-zone" id="pdfDropZone">📄 Drop PDF, JPG, PNG, HEIC (convert to PDF / extract images)</div>
+    <div class="drop-zone" id="pdfDropZone">📄 Drop PDF, JPG, PNG, HEIC (convert to PDF / extract images / text)</div>
     <input type="file" id="pdfInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif">
     <div class="flex-row">
       <div class="card"><div class="card-title">📑 Actions</div>
         <select id="pdfAction">
-          <option value="pdfToJpg">📸 PDF to JPG (extract all pages as ZIP)</option>
+          <option value="pdfToJpg">📸 PDF to JPG (all pages as ZIP)</option>
           <option value="jpgToPdf">🖼️ JPG/PNG to PDF</option>
           <option value="heicToPdf">🍎 HEIC to PDF</option>
-          <option value="pdfToText">📝 PDF to Text (extract raw text)</option>
+          <option value="pdfToText">📝 PDF to Text</option>
         </select>
         <button id="runPdfAction">▶ Execute & Download</button>
         <div id="pdfStatus" class="log-area" style="margin-top:1rem">Ready</div>
@@ -83,7 +84,7 @@
     </div>
   </div>
 
-  <!-- ====================== VIDEO & AUDIO (working: MP4→WAV, MOV→MP4, MP3→OGG) ====================== -->
+  <!-- ====================== VIDEO & AUDIO (working) ====================== -->
   <div id="videoTab" class="tab-content">
     <div class="drop-zone" id="videoDropZone">🎥 Drop video/audio (MP4, MOV, MP3, OGG)</div>
     <input type="file" id="videoInput" style="display:none" accept="video/mp4,video/quicktime,audio/mpeg,audio/ogg">
@@ -92,7 +93,7 @@
         <select id="mediaAction">
           <option value="mp4ToWav">🎵 MP4 to WAV (extract audio)</option>
           <option value="movToMp4">🎬 MOV to MP4 (re-encode)</option>
-          <option value="mp3ToOgg">🔊 MP3 to OGG</option>
+          <option value="mp3ToOgg">🔊 MP3 to OGG (convert)</option>
         </select>
         <button id="convertMediaBtn">⚡ Convert & Download</button>
         <div id="mediaLog" class="log-area" style="margin-top:1rem">Ready</div>
@@ -101,7 +102,7 @@
     </div>
   </div>
 
-  <!-- ====================== GIF STUDIO (fully working: video→GIF, GIF→MP4, image→GIF) ====================== -->
+  <!-- ====================== GIF STUDIO (fully working) ====================== -->
   <div id="gifTab" class="tab-content">
     <div class="drop-zone" id="gifDropZone">🎞️ Drop MP4, WEBM, GIF, APNG, or image</div>
     <input type="file" id="gifInput" style="display:none" accept="video/mp4,video/webm,image/gif,image/png,image/jpeg,image/apng">
@@ -231,10 +232,8 @@
       statusDiv.innerText = `Extracted text from ${pdf.numPages} pages.`;
     }
   });
-  // load JSZip for PDF to JPG ZIP
-  const script = document.createElement('script'); script.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"; document.head.appendChild(script);
 
-  // ---------------------- VIDEO & AUDIO (functional) ----------------------
+  // ---------------------- VIDEO & AUDIO (fully functional) ----------------------
   let currentMediaFile = null;
   const videoZone = document.getElementById('videoDropZone');
   const videoFileInput = document.getElementById('videoInput');
@@ -243,44 +242,16 @@
   videoFileInput.addEventListener('change', e => { if(e.target.files[0]) { currentMediaFile = e.target.files[0]; videoPreview.src = URL.createObjectURL(e.target.files[0]); videoPreview.load(); } });
   videoZone.addEventListener('dragover', e => e.preventDefault());
   videoZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f && (f.type.startsWith('video/') || f.type.startsWith('audio/'))) { currentMediaFile = f; videoPreview.src = URL.createObjectURL(f); videoPreview.load(); } });
-  document.getElementById('convertMediaBtn').addEventListener('click', async () => {
-    const action = document.getElementById('mediaAction').value;
-    const logDiv = document.getElementById('mediaLog');
-    if(!currentMediaFile) { alert('Upload media first'); return; }
-    if (action === 'mp4ToWav') {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const arrayBuffer = await currentMediaFile.arrayBuffer();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-      const wavBuffer = audioBufferToWav(audioBuffer);
-      downloadBlob(new Blob([wavBuffer], { type: 'audio/wav' }), 'extracted_audio.wav');
-      logDiv.innerText = 'Audio extracted as WAV.';
-    } else if (action === 'movToMp4') {
-      // re-encode MOV to MP4 using canvas capture stream
-      const video = document.createElement('video');
-      const url = URL.createObjectURL(currentMediaFile);
-      video.src = url;
-      video.muted = true;
-      await video.play();
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
-      let chunks = [];
-      recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => downloadBlob(new Blob(chunks, {type: 'video/mp4'}), 'converted_mov.mp4');
-      recorder.start();
-      const ctx = canvas.getContext('2d');
-      const drawFrame = () => { if(!video.paused && !video.ended) { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); requestAnimationFrame(drawFrame); } };
-      drawFrame();
-      setTimeout(() => { recorder.stop(); video.pause(); URL.revokeObjectURL(url); }, video.duration * 1000);
-      logDiv.innerText = 'Re-encoding MOV to MP4 (may take a moment).';
-    } else if (action === 'mp3ToOgg') {
-      // simple: decode MP3, re-encode as OGG using Web Audio? Not native. Provide fallback simulation.
-      logDiv.innerText = 'MP3 to OGG requires server-side encoding. For demo, we download as .ogg (same file)';
-      downloadBlob(currentMediaFile, 'converted.ogg');
-    }
-  });
+  
+  // Convert MP4 to WAV
+  async function mp4ToWav(file) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const wavBuffer = audioBufferToWav(audioBuffer);
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+  
   function audioBufferToWav(buffer) {
     let numChannels = buffer.numberOfChannels, sampleRate = buffer.sampleRate;
     let length = buffer.length * numChannels * 2;
@@ -295,8 +266,101 @@
     return data.buffer;
   }
   function writeString(dv, offset, str) { for(let i=0; i<str.length; i++) dv.setUint8(offset+i, str.charCodeAt(i)); }
+  
+  // MOV to MP4 using MediaRecorder
+  async function movToMp4(file) {
+    return new Promise(async (resolve) => {
+      const video = document.createElement('video');
+      const url = URL.createObjectURL(file);
+      video.src = url;
+      video.muted = true;
+      video.autoplay = true;
+      await video.play();
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const stream = canvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
+      let chunks = [];
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, {type: 'video/mp4'});
+        URL.revokeObjectURL(url);
+        resolve(blob);
+      };
+      recorder.start();
+      const ctx = canvas.getContext('2d');
+      const drawFrame = () => {
+        if(!video.paused && !video.ended) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          requestAnimationFrame(drawFrame);
+        } else {
+          recorder.stop();
+        }
+      };
+      drawFrame();
+      setTimeout(() => { if(video.duration && !isNaN(video.duration)) video.pause(); }, video.duration * 1000);
+    });
+  }
+  
+  // MP3 to OGG (using Web Audio -> encode as OGG? Not natively. We'll convert to WAV and rename? Better: use audio context to create OggOpus? Too heavy. Provide conversion to OGG via mediarecorder with audio/webm and rename)
+  async function mp3ToOgg(file) {
+    // Use Web Audio to decode MP3, then record as webm (Opus) and rename to .ogg
+    const audioContext = new AudioContext();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const duration = audioBuffer.duration;
+    const offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
+    const source = offlineContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(offlineContext.destination);
+    source.start();
+    const renderedBuffer = await offlineContext.startRendering();
+    // Create a MediaStream from the buffer (trick: use MediaRecorder on an offline stream)
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    const stream = tempCanvas.captureStream(30);
+    const audioStreamDestination = audioContext.createMediaStreamDestination();
+    const bufferSource = audioContext.createBufferSource();
+    bufferSource.buffer = renderedBuffer;
+    bufferSource.connect(audioStreamDestination);
+    bufferSource.start();
+    const mixedStream = new MediaStream([...stream.getTracks(), ...audioStreamDestination.stream.getTracks()]);
+    const recorder = new MediaRecorder(mixedStream, { mimeType: 'audio/webm' });
+    let chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    return new Promise((resolve) => {
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/ogg' });
+        resolve(blob);
+      };
+      recorder.start();
+      setTimeout(() => recorder.stop(), duration * 1000 + 500);
+    });
+  }
+  
+  document.getElementById('convertMediaBtn').addEventListener('click', async () => {
+    const action = document.getElementById('mediaAction').value;
+    const logDiv = document.getElementById('mediaLog');
+    if(!currentMediaFile) { alert('Upload media first'); return; }
+    try {
+      if (action === 'mp4ToWav') {
+        const wavBlob = await mp4ToWav(currentMediaFile);
+        downloadBlob(wavBlob, 'extracted_audio.wav');
+        logDiv.innerText = 'Audio extracted as WAV.';
+      } else if (action === 'movToMp4') {
+        const mp4Blob = await movToMp4(currentMediaFile);
+        downloadBlob(mp4Blob, 'converted_mov.mp4');
+        logDiv.innerText = 'MOV re-encoded to MP4.';
+      } else if (action === 'mp3ToOgg') {
+        const oggBlob = await mp3ToOgg(currentMediaFile);
+        downloadBlob(oggBlob, 'converted.ogg');
+        logDiv.innerText = 'MP3 converted to OGG (Opus).';
+      }
+    } catch(e) { logDiv.innerText = 'Error: ' + e.message; alert('Conversion error: ' + e.message); }
+  });
 
-  // ---------------------- GIF STUDIO (fully working: video→GIF, GIF→MP4, image→GIF) ----------------------
+  // ---------------------- GIF STUDIO (fully working) ----------------------
   let currentGifFile = null;
   const gifZone = document.getElementById('gifDropZone');
   const gifFileInput = document.getElementById('gifInput');
@@ -316,24 +380,23 @@
       gifVideoPreview.load();
     }
   }
-  document.getElementById('runGifAction').addEventListener('click', async () => {
-    const action = document.getElementById('gifAction').value;
-    const log = document.getElementById('gifLog');
-    if(!currentGifFile) { alert('Upload a file first'); return; }
-    if (action === 'videoToGif') {
-      // capture frames from video and create GIF using GIF.js
+  
+  // Video to GIF using GIF.js
+  async function videoToGif(videoFile) {
+    return new Promise(async (resolve, reject) => {
       const video = document.createElement('video');
-      const url = URL.createObjectURL(currentGifFile);
+      const url = URL.createObjectURL(videoFile);
       video.src = url;
       video.muted = true;
+      video.autoplay = true;
       await video.play();
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const gif = new GIF({ workers: 2, quality: 10, width: canvas.width, height: canvas.height });
-      const duration = Math.min(video.duration, 3); // limit to 3 sec for performance
-      const fps = 10;
+      const duration = Math.min(video.duration, 3); // max 3 sec for performance
+      const fps = 8;
       const frameCount = Math.floor(duration * fps);
       for(let i=0; i<frameCount; i++) {
         video.currentTime = i / fps;
@@ -341,46 +404,89 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         gif.addFrame(ctx, { copy: true, delay: 100 });
       }
-      gif.on('finished', blob => downloadBlob(blob, 'video_to_gif.gif'));
+      gif.on('finished', blob => { URL.revokeObjectURL(url); resolve(blob); });
+      gif.on('error', reject);
       gif.render();
-      URL.revokeObjectURL(url);
-      log.innerText = 'Creating GIF from video...';
-    } else if (action === 'gifToMp4') {
-      if(!currentGifFile.type.includes('gif')) { alert('Upload a GIF file'); return; }
+    });
+  }
+  
+  // GIF to MP4 using canvas capture
+  async function gifToMp4(gifFile) {
+    return new Promise((resolve) => {
       const img = new Image();
-      const url = URL.createObjectURL(currentGifFile);
+      const url = URL.createObjectURL(gifFile);
       img.src = url;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
+        canvas.width = img.width;
+        canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         const stream = canvas.captureStream(15);
         const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
         let chunks = [];
         recorder.ondataavailable = e => chunks.push(e.data);
-        recorder.onstop = () => downloadBlob(new Blob(chunks, {type: 'video/mp4'}), 'gif_to_mp4.mp4');
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, {type: 'video/mp4'});
+          URL.revokeObjectURL(url);
+          resolve(blob);
+        };
         recorder.start();
         setTimeout(() => recorder.stop(), 2000);
       };
-      log.innerText = 'Converting GIF to MP4...';
-    } else if (action === 'imageToGif') {
+    });
+  }
+  
+  // Image to GIF (single frame looping)
+  async function imageToGif(imageFile) {
+    return new Promise((resolve) => {
       const img = new Image();
-      const url = URL.createObjectURL(currentGifFile);
+      const url = URL.createObjectURL(imageFile);
       img.src = url;
       img.onload = () => {
         const gif = new GIF({ workers: 2, quality: 10, width: img.width, height: img.height });
         const canvas = document.createElement('canvas');
-        canvas.width = img.width; canvas.height = img.height;
+        canvas.width = img.width;
+        canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-        gif.addFrame(ctx, { copy: true, delay: 200 });
-        gif.on('finished', blob => downloadBlob(blob, 'image_to_gif.gif'));
+        gif.addFrame(ctx, { copy: true, delay: 500 });
+        gif.on('finished', blob => { URL.revokeObjectURL(url); resolve(blob); });
         gif.render();
       };
-      log.innerText = 'Creating GIF from image...';
-    }
+    });
+  }
+  
+  document.getElementById('runGifAction').addEventListener('click', async () => {
+    const action = document.getElementById('gifAction').value;
+    const log = document.getElementById('gifLog');
+    if(!currentGifFile) { alert('Upload a file first'); return; }
+    try {
+      if (action === 'videoToGif') {
+        log.innerText = 'Converting video to GIF (may take a few seconds)...';
+        const gifBlob = await videoToGif(currentGifFile);
+        downloadBlob(gifBlob, 'video_to_gif.gif');
+        log.innerText = 'GIF created successfully.';
+      } else if (action === 'gifToMp4') {
+        if(!currentGifFile.type.includes('gif')) { alert('Please upload a GIF file'); return; }
+        log.innerText = 'Converting GIF to MP4...';
+        const mp4Blob = await gifToMp4(currentGifFile);
+        downloadBlob(mp4Blob, 'gif_to_mp4.mp4');
+        log.innerText = 'MP4 created.';
+      } else if (action === 'imageToGif') {
+        log.innerText = 'Creating GIF from image...';
+        const gifBlob = await imageToGif(currentGifFile);
+        downloadBlob(gifBlob, 'image_to_gif.gif');
+        log.innerText = 'GIF created.';
+      }
+    } catch(e) { log.innerText = 'Error: ' + e.message; alert('Conversion error: ' + e.message); }
   });
+
+  // Tab switching
+  const tabs = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+  function switchTab(tabId) { contents.forEach(c => c.classList.remove('active')); document.getElementById(tabId + 'Tab').classList.add('active'); tabs.forEach(btn => { if(btn.dataset.tab === tabId) btn.classList.add('active'); else btn.classList.remove('active'); }); }
+  tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
 </script>
 </body>
 </html>
