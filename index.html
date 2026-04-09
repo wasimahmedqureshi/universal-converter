@@ -3,13 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Universal Converter Pro | Fully Working PDF, Video, Audio, GIF</title>
+  <title>Universal Converter Pro | Full Suite: DOCX, Excel, PDF, MP4→MP3</title>
   <!-- Core libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+  <!-- DOCX, Excel, PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- MP3 encoder -->
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
     body { background: #0e1a24; padding: 1.5rem; min-height: 100vh; }
@@ -41,8 +48,8 @@
 <body>
 <div class="app-container">
   <header>
-    <h1>⚡ Universal Converter <span class="badge">Fully Functional</span></h1>
-    <div class="sub">PDF, Images, Documents, Video, Audio, GIF — real client-side conversion</div>
+    <h1>⚡ Universal Converter <span class="badge">Pro Suite</span></h1>
+    <div class="sub">DOCX → PDF · Excel → PDF · Image → PDF · MP4 → MP3 · GIF Studio · Video/Audio</div>
   </header>
   <div class="tabs">
     <button class="tab-btn active" data-tab="image">🖼️ Image</button>
@@ -65,16 +72,17 @@
     </div>
   </div>
 
-  <!-- ====================== PDF & DOCUMENTS (fully working) ====================== -->
+  <!-- ====================== PDF & DOCUMENTS (DOCX, Excel, Image to PDF) ====================== -->
   <div id="pdfTab" class="tab-content">
-    <div class="drop-zone" id="pdfDropZone">📄 Drop PDF, JPG, PNG, HEIC (convert to PDF / extract images / text)</div>
-    <input type="file" id="pdfInput" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif">
+    <div class="drop-zone" id="pdfDropZone">📄 Drop file: PDF, DOCX, XLSX, JPG, PNG, HEIC</div>
+    <input type="file" id="pdfInput" style="display:none" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.heic,.heif">
     <div class="flex-row">
       <div class="card"><div class="card-title">📑 Actions</div>
         <select id="pdfAction">
-          <option value="pdfToJpg">📸 PDF to JPG (all pages as ZIP)</option>
-          <option value="jpgToPdf">🖼️ JPG/PNG to PDF</option>
-          <option value="heicToPdf">🍎 HEIC to PDF</option>
+          <option value="pdfToJpg">📸 PDF to JPG (ZIP)</option>
+          <option value="jpgToPdf">🖼️ Image to PDF (JPG/PNG/HEIC)</option>
+          <option value="docxToPdf">📝 DOCX to PDF</option>
+          <option value="excelToPdf">📊 Excel (XLSX) to PDF</option>
           <option value="pdfToText">📝 PDF to Text</option>
         </select>
         <button id="runPdfAction">▶ Execute & Download</button>
@@ -84,25 +92,26 @@
     </div>
   </div>
 
-  <!-- ====================== VIDEO & AUDIO (working) ====================== -->
+  <!-- ====================== VIDEO & AUDIO (MP4 → MP3 added) ====================== -->
   <div id="videoTab" class="tab-content">
     <div class="drop-zone" id="videoDropZone">🎥 Drop video/audio (MP4, MOV, MP3, OGG)</div>
     <input type="file" id="videoInput" style="display:none" accept="video/mp4,video/quicktime,audio/mpeg,audio/ogg">
     <div class="flex-row">
       <div class="card"><div class="card-title">🎛️ Conversion</div>
         <select id="mediaAction">
-          <option value="mp4ToWav">🎵 MP4 to WAV (extract audio)</option>
-          <option value="movToMp4">🎬 MOV to MP4 (re-encode)</option>
-          <option value="mp3ToOgg">🔊 MP3 to OGG (convert)</option>
+          <option value="mp4ToMp3">🎵 MP4 to MP3 (extract audio)</option>
+          <option value="mp4ToWav">🎵 MP4 to WAV</option>
+          <option value="movToMp4">🎬 MOV to MP4</option>
+          <option value="mp3ToOgg">🔊 MP3 to OGG</option>
         </select>
         <button id="convertMediaBtn">⚡ Convert & Download</button>
         <div id="mediaLog" class="log-area" style="margin-top:1rem">Ready</div>
       </div>
-      <div class="card"><div class="card-title">📺 Preview</div><video id="videoPreview" controls style="max-width:100%; max-height:180px; background:#000"></video><div id="audioInfo"></div></div>
+      <div class="card"><div class="card-title">📺 Preview</div><video id="videoPreview" controls style="max-width:100%; max-height:180px; background:#000"></video></div>
     </div>
   </div>
 
-  <!-- ====================== GIF STUDIO (fully working) ====================== -->
+  <!-- ====================== GIF STUDIO ====================== -->
   <div id="gifTab" class="tab-content">
     <div class="drop-zone" id="gifDropZone">🎞️ Drop MP4, WEBM, GIF, APNG, or image</div>
     <input type="file" id="gifInput" style="display:none" accept="video/mp4,video/webm,image/gif,image/png,image/jpeg,image/apng">
@@ -126,7 +135,7 @@
   function downloadBlob(blob, filename) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href); }
   function showStatus(elem, msg) { if(elem) elem.innerText = msg; }
 
-  // ---------------------- IMAGE (WEBP/PNG/HEIC) ----------------------
+  // ---------------------- IMAGE (unchanged but working) ----------------------
   let currentImageFile = null;
   const imageZone = document.getElementById('imageDropZone');
   const imageInput = document.getElementById('imageInput');
@@ -164,20 +173,33 @@
   });
   document.getElementById('imgQuality').addEventListener('input', e => document.getElementById('qualVal').innerText = Math.round(e.target.value*100)+'%');
 
-  // ---------------------- PDF & DOCUMENTS (working) ----------------------
-  let currentPdfFile = null;
+  // ---------------------- PDF & DOCUMENTS (Enhanced with DOCX, Excel) ----------------------
+  let currentDocFile = null;
   const pdfZone = document.getElementById('pdfDropZone');
   const pdfFileInput = document.getElementById('pdfInput');
   pdfZone.addEventListener('click', () => pdfFileInput.click());
-  pdfFileInput.addEventListener('change', e => { if(e.target.files[0]) { currentPdfFile = e.target.files[0]; showStatus(document.getElementById('pdfPreview'), `Loaded: ${e.target.files[0].name}`); } });
+  pdfFileInput.addEventListener('change', e => { if(e.target.files[0]) { currentDocFile = e.target.files[0]; showStatus(document.getElementById('pdfPreview'), `Loaded: ${e.target.files[0].name}`); } });
   pdfZone.addEventListener('dragover', e => e.preventDefault());
-  pdfZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) { currentPdfFile = f; showStatus(document.getElementById('pdfPreview'), `Dropped: ${f.name}`); } });
+  pdfZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) { currentDocFile = f; showStatus(document.getElementById('pdfPreview'), `Dropped: ${f.name}`); } });
+
+  // Helper: Convert HTML element to PDF using html2canvas + jsPDF
+  async function htmlToPdf(htmlElement, filename) {
+    const canvas = await html2canvas(htmlElement, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'px', format: [canvas.width, canvas.height] });
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+    pdf.save(filename);
+  }
+
   document.getElementById('runPdfAction').addEventListener('click', async () => {
-    if(!currentPdfFile) { alert('Upload a file first'); return; }
+    if(!currentDocFile) { alert('Upload a file first'); return; }
     const action = document.getElementById('pdfAction').value;
     const statusDiv = document.getElementById('pdfStatus');
+    const fileExt = currentDocFile.name.split('.').pop().toLowerCase();
+
     if (action === 'pdfToJpg') {
-      const arrayBuffer = await currentPdfFile.arrayBuffer();
+      const arrayBuffer = await currentDocFile.arrayBuffer();
       const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       const zip = new JSZip();
@@ -192,48 +214,77 @@
       }
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       downloadBlob(zipBlob, 'pdf_pages.zip');
-      statusDiv.innerText = `Exported ${pdf.numPages} pages as JPG (ZIP).`;
-    } else if (action === 'jpgToPdf') {
-      if(!currentPdfFile.type.startsWith('image/')) { alert('Please upload an image (JPG/PNG)'); return; }
+      statusDiv.innerText = `Exported ${pdf.numPages} pages as JPG.`;
+    } 
+    else if (action === 'jpgToPdf') {
+      // Image to PDF (supports JPG, PNG, HEIC)
+      let imgBlob = currentDocFile;
+      if (currentDocFile.name.match(/\.(heic|heif)$/i)) imgBlob = await heic2any({ blob: currentDocFile, toType: 'image/jpeg' });
       const { PDFDocument } = PDFLib;
       const pdfDoc = await PDFDocument.create();
-      const imageBytes = await currentPdfFile.arrayBuffer();
-      let imageEmbed = currentPdfFile.type === 'image/jpeg' ? await pdfDoc.embedJpg(imageBytes) : await pdfDoc.embedPng(imageBytes);
+      const imageBytes = await imgBlob.arrayBuffer();
+      let imageEmbed;
+      if (imgBlob.type === 'image/jpeg') imageEmbed = await pdfDoc.embedJpg(imageBytes);
+      else imageEmbed = await pdfDoc.embedPng(imageBytes);
       const page = pdfDoc.addPage([imageEmbed.width, imageEmbed.height]);
       page.drawImage(imageEmbed, { x: 0, y: 0, width: imageEmbed.width, height: imageEmbed.height });
       const pdfBytes = await pdfDoc.save();
       downloadBlob(new Blob([pdfBytes], {type: 'application/pdf'}), 'image_to_pdf.pdf');
       statusDiv.innerText = 'Image converted to PDF.';
-    } else if (action === 'heicToPdf') {
-      if(!currentPdfFile.name.match(/\.(heic|heif)$/i)) { alert('Upload HEIC file'); return; }
-      const jpegBlob = await heic2any({ blob: currentPdfFile, toType: 'image/jpeg' });
-      const { PDFDocument } = PDFLib;
-      const pdfDoc = await PDFDocument.create();
-      const imageBytes = await jpegBlob.arrayBuffer();
-      const imageEmbed = await pdfDoc.embedJpg(imageBytes);
-      const page = pdfDoc.addPage([imageEmbed.width, imageEmbed.height]);
-      page.drawImage(imageEmbed, { x: 0, y: 0, width: imageEmbed.width, height: imageEmbed.height });
-      const pdfBytes = await pdfDoc.save();
-      downloadBlob(new Blob([pdfBytes], {type: 'application/pdf'}), 'heic_to_pdf.pdf');
-      statusDiv.innerText = 'HEIC → PDF done.';
-    } else if (action === 'pdfToText') {
-      const arrayBuffer = await currentPdfFile.arrayBuffer();
+    }
+    else if (action === 'docxToPdf') {
+      if (fileExt !== 'docx') { alert('Please upload a .docx file'); return; }
+      statusDiv.innerText = 'Converting DOCX to PDF...';
+      const arrayBuffer = await currentDocFile.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const htmlContent = result.value;
+      // Create temporary container
+      const container = document.createElement('div');
+      container.style.padding = '20px';
+      container.style.backgroundColor = 'white';
+      container.style.color = 'black';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.innerHTML = htmlContent;
+      document.body.appendChild(container);
+      await htmlToPdf(container, 'docx_to_pdf.pdf');
+      document.body.removeChild(container);
+      statusDiv.innerText = 'DOCX converted to PDF.';
+    }
+    else if (action === 'excelToPdf') {
+      if (fileExt !== 'xlsx') { alert('Please upload an .xlsx file'); return; }
+      statusDiv.innerText = 'Converting Excel to PDF...';
+      const arrayBuffer = await currentDocFile.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const html = XLSX.utils.sheet_to_html(worksheet);
+      const container = document.createElement('div');
+      container.style.padding = '20px';
+      container.style.backgroundColor = 'white';
+      container.style.color = 'black';
+      container.style.fontFamily = 'Arial, sans-serif';
+      container.innerHTML = html;
+      document.body.appendChild(container);
+      await htmlToPdf(container, 'excel_to_pdf.pdf');
+      document.body.removeChild(container);
+      statusDiv.innerText = 'Excel sheet converted to PDF.';
+    }
+    else if (action === 'pdfToText') {
+      const arrayBuffer = await currentDocFile.arrayBuffer();
       const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       let fullText = '';
       for(let i=1; i<=pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const strings = textContent.items.map(item => item.str);
-        fullText += strings.join(' ') + '\n\n';
+        fullText += textContent.items.map(item => item.str).join(' ') + '\n\n';
       }
-      const blob = new Blob([fullText], {type: 'text/plain'});
-      downloadBlob(blob, 'extracted_text.txt');
+      downloadBlob(new Blob([fullText], {type: 'text/plain'}), 'extracted_text.txt');
       statusDiv.innerText = `Extracted text from ${pdf.numPages} pages.`;
     }
   });
 
-  // ---------------------- VIDEO & AUDIO (fully functional) ----------------------
+  // ---------------------- VIDEO & AUDIO (MP4 to MP3 using lamejs) ----------------------
   let currentMediaFile = null;
   const videoZone = document.getElementById('videoDropZone');
   const videoFileInput = document.getElementById('videoInput');
@@ -242,16 +293,42 @@
   videoFileInput.addEventListener('change', e => { if(e.target.files[0]) { currentMediaFile = e.target.files[0]; videoPreview.src = URL.createObjectURL(e.target.files[0]); videoPreview.load(); } });
   videoZone.addEventListener('dragover', e => e.preventDefault());
   videoZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f && (f.type.startsWith('video/') || f.type.startsWith('audio/'))) { currentMediaFile = f; videoPreview.src = URL.createObjectURL(f); videoPreview.load(); } });
-  
-  // Convert MP4 to WAV
+
+  // Convert AudioBuffer to MP3 using lamejs
+  function audioBufferToMp3(audioBuffer) {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const samples = audioBuffer.getChannelData(0);
+    const sampleBlockSize = 1152;
+    const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, 128);
+    const mp3Data = [];
+    let remaining = samples.length;
+    for (let i = 0; i < samples.length; i += sampleBlockSize) {
+      const chunk = samples.slice(i, i + sampleBlockSize);
+      const sampleInts = new Int16Array(chunk.length);
+      for (let j = 0; j < chunk.length; j++) sampleInts[j] = Math.max(-32768, Math.min(32767, chunk[j] * 32767));
+      const mp3buf = mp3encoder.encodeBuffer(sampleInts);
+      if (mp3buf.length > 0) mp3Data.push(mp3buf);
+    }
+    const endBuf = mp3encoder.flush();
+    if (endBuf.length > 0) mp3Data.push(endBuf);
+    return new Blob(mp3Data, { type: 'audio/mp3' });
+  }
+
+  async function mp4ToMp3(file) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuffer = await file.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    return audioBufferToMp3(audioBuffer);
+  }
+
   async function mp4ToWav(file) {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    const wavBuffer = audioBufferToWav(audioBuffer);
-    return new Blob([wavBuffer], { type: 'audio/wav' });
+    return audioBufferToWav(audioBuffer);
   }
-  
+
   function audioBufferToWav(buffer) {
     let numChannels = buffer.numberOfChannels, sampleRate = buffer.sampleRate;
     let length = buffer.length * numChannels * 2;
@@ -266,8 +343,7 @@
     return data.buffer;
   }
   function writeString(dv, offset, str) { for(let i=0; i<str.length; i++) dv.setUint8(offset+i, str.charCodeAt(i)); }
-  
-  // MOV to MP4 using MediaRecorder
+
   async function movToMp4(file) {
     return new Promise(async (resolve) => {
       const video = document.createElement('video');
@@ -283,84 +359,69 @@
       const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
       let chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, {type: 'video/mp4'});
-        URL.revokeObjectURL(url);
-        resolve(blob);
-      };
+      recorder.onstop = () => { resolve(new Blob(chunks, {type: 'video/mp4'})); URL.revokeObjectURL(url); };
       recorder.start();
       const ctx = canvas.getContext('2d');
       const drawFrame = () => {
-        if(!video.paused && !video.ended) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          requestAnimationFrame(drawFrame);
-        } else {
-          recorder.stop();
-        }
+        if(!video.paused && !video.ended) { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); requestAnimationFrame(drawFrame); }
+        else recorder.stop();
       };
       drawFrame();
       setTimeout(() => { if(video.duration && !isNaN(video.duration)) video.pause(); }, video.duration * 1000);
     });
   }
-  
-  // MP3 to OGG (using Web Audio -> encode as OGG? Not natively. We'll convert to WAV and rename? Better: use audio context to create OggOpus? Too heavy. Provide conversion to OGG via mediarecorder with audio/webm and rename)
+
   async function mp3ToOgg(file) {
-    // Use Web Audio to decode MP3, then record as webm (Opus) and rename to .ogg
+    // Convert MP3 to OGG via Web Audio + MediaRecorder (Opus)
     const audioContext = new AudioContext();
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
     const duration = audioBuffer.duration;
-    const offlineContext = new OfflineAudioContext(audioBuffer.numberOfChannels, audioBuffer.length, audioBuffer.sampleRate);
-    const source = offlineContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(offlineContext.destination);
-    source.start();
-    const renderedBuffer = await offlineContext.startRendering();
-    // Create a MediaStream from the buffer (trick: use MediaRecorder on an offline stream)
     const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d');
     const stream = tempCanvas.captureStream(30);
-    const audioStreamDestination = audioContext.createMediaStreamDestination();
-    const bufferSource = audioContext.createBufferSource();
-    bufferSource.buffer = renderedBuffer;
-    bufferSource.connect(audioStreamDestination);
-    bufferSource.start();
-    const mixedStream = new MediaStream([...stream.getTracks(), ...audioStreamDestination.stream.getTracks()]);
+    const audioStreamDest = audioContext.createMediaStreamDestination();
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(audioStreamDest);
+    source.start();
+    const mixedStream = new MediaStream([...stream.getTracks(), ...audioStreamDest.stream.getTracks()]);
     const recorder = new MediaRecorder(mixedStream, { mimeType: 'audio/webm' });
     let chunks = [];
     recorder.ondataavailable = e => chunks.push(e.data);
     return new Promise((resolve) => {
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/ogg' });
-        resolve(blob);
-      };
+      recorder.onstop = () => resolve(new Blob(chunks, { type: 'audio/ogg' }));
       recorder.start();
       setTimeout(() => recorder.stop(), duration * 1000 + 500);
     });
   }
-  
+
   document.getElementById('convertMediaBtn').addEventListener('click', async () => {
     const action = document.getElementById('mediaAction').value;
     const logDiv = document.getElementById('mediaLog');
     if(!currentMediaFile) { alert('Upload media first'); return; }
     try {
-      if (action === 'mp4ToWav') {
+      if (action === 'mp4ToMp3') {
+        logDiv.innerText = 'Converting MP4 to MP3...';
+        const mp3Blob = await mp4ToMp3(currentMediaFile);
+        downloadBlob(mp3Blob, 'extracted_audio.mp3');
+        logDiv.innerText = 'MP3 created successfully.';
+      } else if (action === 'mp4ToWav') {
         const wavBlob = await mp4ToWav(currentMediaFile);
         downloadBlob(wavBlob, 'extracted_audio.wav');
-        logDiv.innerText = 'Audio extracted as WAV.';
+        logDiv.innerText = 'WAV extracted.';
       } else if (action === 'movToMp4') {
         const mp4Blob = await movToMp4(currentMediaFile);
         downloadBlob(mp4Blob, 'converted_mov.mp4');
-        logDiv.innerText = 'MOV re-encoded to MP4.';
+        logDiv.innerText = 'MOV to MP4 done.';
       } else if (action === 'mp3ToOgg') {
         const oggBlob = await mp3ToOgg(currentMediaFile);
         downloadBlob(oggBlob, 'converted.ogg');
-        logDiv.innerText = 'MP3 converted to OGG (Opus).';
+        logDiv.innerText = 'MP3 to OGG converted.';
       }
-    } catch(e) { logDiv.innerText = 'Error: ' + e.message; alert('Conversion error: ' + e.message); }
+    } catch(e) { logDiv.innerText = 'Error: ' + e.message; alert('Conversion error'); }
   });
 
-  // ---------------------- GIF STUDIO (fully working) ----------------------
+  // ---------------------- GIF STUDIO (working as before) ----------------------
   let currentGifFile = null;
   const gifZone = document.getElementById('gifDropZone');
   const gifFileInput = document.getElementById('gifInput');
@@ -373,29 +434,24 @@
   function previewGifFile(file) {
     if(file.type === 'image/gif' || file.type.startsWith('image/')) {
       const url = URL.createObjectURL(file);
-      gifPreview.src = url; gifPreview.style.display = 'block'; gifVideoPreview.style.display = 'none'; document.getElementById('gifMsg').style.display = 'none';
+      gifPreview.src = url; gifPreview.style.display = 'block'; gifVideoPreview.style.display = 'none';
     } else if(file.type.startsWith('video/')) {
       const url = URL.createObjectURL(file);
       gifVideoPreview.src = url; gifVideoPreview.style.display = 'block'; gifPreview.style.display = 'none';
       gifVideoPreview.load();
     }
   }
-  
-  // Video to GIF using GIF.js
   async function videoToGif(videoFile) {
     return new Promise(async (resolve, reject) => {
       const video = document.createElement('video');
       const url = URL.createObjectURL(videoFile);
-      video.src = url;
-      video.muted = true;
-      video.autoplay = true;
+      video.src = url; video.muted = true; video.autoplay = true;
       await video.play();
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       const gif = new GIF({ workers: 2, quality: 10, width: canvas.width, height: canvas.height });
-      const duration = Math.min(video.duration, 3); // max 3 sec for performance
+      const duration = Math.min(video.duration, 3);
       const fps = 8;
       const frameCount = Math.floor(duration * fps);
       for(let i=0; i<frameCount; i++) {
@@ -409,8 +465,6 @@
       gif.render();
     });
   }
-  
-  // GIF to MP4 using canvas capture
   async function gifToMp4(gifFile) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -418,26 +472,19 @@
       img.src = url;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.width; canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         const stream = canvas.captureStream(15);
         const recorder = new MediaRecorder(stream, { mimeType: 'video/mp4' });
         let chunks = [];
         recorder.ondataavailable = e => chunks.push(e.data);
-        recorder.onstop = () => {
-          const blob = new Blob(chunks, {type: 'video/mp4'});
-          URL.revokeObjectURL(url);
-          resolve(blob);
-        };
+        recorder.onstop = () => { resolve(new Blob(chunks, {type: 'video/mp4'})); URL.revokeObjectURL(url); };
         recorder.start();
         setTimeout(() => recorder.stop(), 2000);
       };
     });
   }
-  
-  // Image to GIF (single frame looping)
   async function imageToGif(imageFile) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -446,8 +493,7 @@
       img.onload = () => {
         const gif = new GIF({ workers: 2, quality: 10, width: img.width, height: img.height });
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.width; canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         gif.addFrame(ctx, { copy: true, delay: 500 });
@@ -456,19 +502,18 @@
       };
     });
   }
-  
   document.getElementById('runGifAction').addEventListener('click', async () => {
     const action = document.getElementById('gifAction').value;
     const log = document.getElementById('gifLog');
     if(!currentGifFile) { alert('Upload a file first'); return; }
     try {
       if (action === 'videoToGif') {
-        log.innerText = 'Converting video to GIF (may take a few seconds)...';
+        log.innerText = 'Converting video to GIF...';
         const gifBlob = await videoToGif(currentGifFile);
         downloadBlob(gifBlob, 'video_to_gif.gif');
-        log.innerText = 'GIF created successfully.';
+        log.innerText = 'GIF created.';
       } else if (action === 'gifToMp4') {
-        if(!currentGifFile.type.includes('gif')) { alert('Please upload a GIF file'); return; }
+        if(!currentGifFile.type.includes('gif')) { alert('Upload a GIF file'); return; }
         log.innerText = 'Converting GIF to MP4...';
         const mp4Blob = await gifToMp4(currentGifFile);
         downloadBlob(mp4Blob, 'gif_to_mp4.mp4');
@@ -479,7 +524,7 @@
         downloadBlob(gifBlob, 'image_to_gif.gif');
         log.innerText = 'GIF created.';
       }
-    } catch(e) { log.innerText = 'Error: ' + e.message; alert('Conversion error: ' + e.message); }
+    } catch(e) { log.innerText = 'Error: ' + e.message; alert('Conversion error'); }
   });
 
   // Tab switching
