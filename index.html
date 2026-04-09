@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Universal Converter | Professional Unit Tool</title>
+  <title>Universal File Converter Pro | Convert Images · CSV · JSON · XML · Text</title>
   <style>
     * {
       margin: 0;
@@ -13,620 +13,692 @@
     }
 
     body {
+      background: linear-gradient(135deg, #101f2e 0%, #0a1520 100%);
       min-height: 100vh;
-      background: linear-gradient(145deg, #e9f0fc 0%, #d9e4f5 100%);
+      padding: 2rem 1.5rem;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      align-items: center;
     }
 
     /* main card */
-    .converter-card {
-      max-width: 860px;
+    .converter-app {
+      max-width: 1300px;
       width: 100%;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(0px);
-      border-radius: 2.5rem;
-      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.05);
+      background: rgba(18, 28, 38, 0.92);
+      backdrop-filter: blur(2px);
+      border-radius: 2rem;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
       overflow: hidden;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
     }
 
     /* header */
-    .converter-header {
-      background: #0a1c2f;
-      padding: 1.6rem 2rem;
-      color: white;
+    .app-header {
+      background: #0f212f;
+      padding: 1.8rem 2rem;
+      border-bottom: 1px solid #2a4050;
     }
 
-    .converter-header h1 {
-      font-size: 1.85rem;
-      font-weight: 600;
+    .app-header h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
       letter-spacing: -0.3px;
-      display: flex;
+      background: linear-gradient(120deg, #fff, #7ab3c8);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      display: inline-flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 12px;
     }
 
-    .converter-header h1 span {
-      background: #2c7da0;
-      font-size: 1.3rem;
-      padding: 0.2rem 0.7rem;
-      border-radius: 60px;
+    .badge {
+      background: #2c5f7a;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.8rem;
+      border-radius: 40px;
+      color: white;
       font-weight: 500;
     }
 
-    .converter-header p {
-      font-size: 0.9rem;
-      color: #b9d8f0;
+    .sub {
+      color: #9bb7cc;
       margin-top: 0.5rem;
-      font-weight: 400;
+      font-size: 0.9rem;
+    }
+
+    /* tab navigation */
+    .tab-bar {
+      display: flex;
+      gap: 0.2rem;
+      background: #0a141f;
+      padding: 0.75rem 1.5rem 0 1.5rem;
+      border-bottom: 1px solid #1f3443;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 0.8rem 1.8rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #bcd0df;
+      cursor: pointer;
+      border-radius: 1rem 1rem 0 0;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: #13212e;
+      color: white;
+      border-bottom: 2px solid #3c8db0;
+    }
+
+    .tab-btn:not(.active):hover {
+      background: #0e1b26;
+      color: #e0f0ff;
     }
 
     /* main content */
-    .converter-body {
+    .tab-content {
+      display: none;
       padding: 2rem 2rem 2rem 2rem;
+      animation: fade 0.2s ease;
     }
 
-    /* category selector */
-    .category-group {
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(5px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    /* drag & drop zone */
+    .drop-zone {
+      background: #0f1a24;
+      border: 2px dashed #2c5775;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
       margin-bottom: 2rem;
     }
 
-    .category-label {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 0.8px;
-      color: #2c5f7a;
-      margin-bottom: 0.6rem;
-      display: block;
+    .drop-zone:hover, .drag-over {
+      background: #14232f;
+      border-color: #5fa3c2;
     }
 
-    .category-buttons {
+    .drop-zone .icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    /* preview & controls */
+    .flex-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem;
-      background: #f0f4fa;
-      padding: 0.5rem;
-      border-radius: 1.8rem;
+      gap: 2rem;
+      margin: 1.5rem 0;
     }
 
-    .cat-btn {
-      background: transparent;
-      border: none;
-      padding: 0.65rem 1.4rem;
-      border-radius: 2rem;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: 0.2s;
-      color: #2c3e50;
-      flex: 1 0 auto;
-      text-align: center;
-    }
-
-    .cat-btn.active {
-      background: #1f6392;
-      color: white;
-      box-shadow: 0 4px 10px rgba(31, 99, 146, 0.3);
-    }
-
-    .cat-btn:not(.active):hover {
-      background: #e2eaf3;
-    }
-
-    /* conversion row */
-    .conversion-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.2rem;
-      margin: 1.8rem 0 1.2rem;
-    }
-
-    .unit-box {
+    .preview-box {
       flex: 1;
-      background: #f9fbfe;
-      border-radius: 1.5rem;
-      padding: 1rem 1.2rem;
-      border: 1px solid #e2edf7;
-      transition: 0.2s;
-    }
-
-    .unit-box label {
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: #4f6f8f;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 0.6rem;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-    }
-
-    .input-group input, .input-group select {
-      background: white;
-      border: 1px solid #cfdfed;
+      background: #0c1620;
       border-radius: 1.2rem;
-      padding: 0.85rem 1rem;
-      font-size: 1rem;
+      padding: 1rem;
+      border: 1px solid #253e4f;
+    }
+
+    .preview-title {
+      color: #8fb3ca;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      max-height: 240px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: #00000044;
+    }
+
+    .data-preview {
+      background: #071019;
+      padding: 0.8rem;
+      border-radius: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: #bfd9f0;
+    }
+
+    select, input, button {
+      background: #111e29;
+      border: 1px solid #2d4a60;
+      border-radius: 2rem;
+      padding: 0.6rem 1.2rem;
+      color: white;
       font-weight: 500;
       outline: none;
-      transition: 0.2s;
-      color: #0a2a3b;
-    }
-
-    .input-group input:focus, .input-group select:focus {
-      border-color: #2c7da0;
-      box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
-    }
-
-    .input-group input {
-      font-size: 1.2rem;
-    }
-
-    /* swap button */
-    .swap-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .swap-btn {
-      background: #eef3fc;
-      border: none;
-      width: 52px;
-      height: 52px;
-      border-radius: 60px;
-      font-size: 1.7rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-      color: #1f6392;
-      font-weight: 500;
     }
 
-    .swap-btn:hover {
-      background: #dce9f5;
+    select, input {
+      cursor: pointer;
+      background: #0e1822;
+    }
+
+    .convert-btn {
+      background: linear-gradient(95deg, #1f6392, #124e73);
+      border: none;
+      padding: 0.8rem 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .convert-btn:hover {
+      background: linear-gradient(95deg, #287aad, #1a5e88);
       transform: scale(1.02);
     }
 
-    /* result area */
-    .result-area {
-      margin-top: 2rem;
-      background: linear-gradient(115deg, #eef3fc 0%, #ffffff 100%);
-      border-radius: 1.5rem;
-      padding: 1.2rem 1.5rem;
-      border: 1px solid #dae9f3;
+    .quality-slider {
       display: flex;
-      justify-content: space-between;
-      align-items: baseline;
+      align-items: center;
+      gap: 12px;
       flex-wrap: wrap;
-      gap: 0.8rem;
     }
 
-    .result-label {
-      font-weight: 600;
-      color: #1d4e6e;
-      font-size: 0.9rem;
-      letter-spacing: 0.3px;
+    .quality-slider input {
+      flex: 1;
     }
 
-    .result-value {
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: #0f3b4f;
-      word-break: break-word;
-      text-align: right;
-      font-family: 'JetBrains Mono', monospace, 'Inter';
-    }
-
-    .result-unit {
-      font-size: 1rem;
-      font-weight: 500;
-      color: #4a6f8b;
-      margin-left: 8px;
-    }
-
-    /* footer */
-    .converter-footer {
-      background: #f5f9ff;
-      padding: 0.9rem 2rem;
-      border-top: 1px solid #e2edf5;
-      font-size: 0.75rem;
-      color: #5c7f9e;
+    .footer-meta {
+      background: #0a121b;
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 1rem;
       text-align: center;
-    }
-
-    @media (max-width: 680px) {
-      .converter-body {
-        padding: 1.5rem;
-      }
-      .conversion-row {
-        flex-direction: column;
-      }
-      .swap-wrapper {
-        margin: 0.2rem 0;
-      }
-      .result-value {
-        font-size: 1.5rem;
-      }
-      .cat-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-      }
-    }
-
-    /* input number spinners */
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      opacity: 0.5;
+      font-size: 0.75rem;
+      color: #6b8faa;
     }
   </style>
 </head>
 <body>
-
-<div class="converter-card">
-  <div class="converter-header">
-    <h1>
-      ⚡ Universal Converter
-      <span>Pro</span>
-    </h1>
-    <p>Length · Mass · Temperature · Volume — instant, accurate, seamless</p>
+<div class="converter-app">
+  <div class="app-header">
+    <h1>📂 Universal File Converter <span class="badge">Pro</span></h1>
+    <div class="sub">Convert images, CSV, JSON, XML, Text — all in your browser. No uploads, private & fast.</div>
   </div>
 
-  <div class="converter-body">
-    <!-- category selector (tabs) -->
-    <div class="category-group">
-      <span class="category-label">CONVERSION MODE</span>
-      <div class="category-buttons" id="categoryTabs">
-        <button data-cat="length" class="cat-btn active">📏 Length</button>
-        <button data-cat="weight" class="cat-btn">⚖️ Mass</button>
-        <button data-cat="temperature" class="cat-btn">🌡️ Temperature</button>
-        <button data-cat="volume" class="cat-btn">🧴 Volume</button>
-      </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="image">🖼️ Image Converter</button>
+    <button class="tab-btn" data-tab="data">📊 Data Converter (CSV/JSON/XML)</button>
+    <button class="tab-btn" data-tab="text">📄 Text/HTML Converter</button>
+  </div>
+
+  <!-- ========================= IMAGE TAB ========================= -->
+  <div id="imageTab" class="tab-content active">
+    <div class="drop-zone" id="imageDropZone">
+      <div class="icon">🖼️📁</div>
+      <p>Drag & drop image or click to upload</p>
+      <p style="font-size: 0.7rem; margin-top: 6px;">PNG, JPEG, WEBP, BMP, GIF, SVG (output: PNG, JPEG, WEBP, BMP)</p>
+      <input type="file" id="imageFileInput" accept="image/*" class="file-input-hidden">
     </div>
 
-    <!-- dynamic converter area -->
-    <div class="conversion-row">
-      <div class="unit-box">
-        <label>FROM</label>
-        <div class="input-group">
-          <input type="number" id="inputValue" value="1.0" step="any" placeholder="Enter value">
-          <select id="fromUnit"></select>
+    <div class="flex-row">
+      <div class="preview-box">
+        <div class="preview-title">📷 ORIGINAL PREVIEW</div>
+        <img id="originalImagePreview" class="image-preview" alt="Preview" style="max-width:100%; display: none;">
+        <div id="noImageText" style="color:#7a9bb2;">No image loaded</div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-title">⚙️ CONVERSION SETTINGS</div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label style="display: block; margin-bottom: 6px;">Output Format</label>
+            <select id="imageOutputFormat">
+              <option value="image/png">PNG (.png)</option>
+              <option value="image/jpeg">JPEG (.jpg)</option>
+              <option value="image/webp">WEBP (.webp)</option>
+              <option value="image/bmp">BMP (.bmp)</option>
+            </select>
+          </div>
+          <div class="quality-slider" id="qualityContainer">
+            <span>Quality (JPEG/WEBP):</span>
+            <input type="range" id="imageQuality" min="0.1" max="1" step="0.01" value="0.92">
+            <span id="qualityValue">92%</span>
+          </div>
+          <button class="convert-btn" id="convertImageBtn">🔄 Convert & Download Image</button>
         </div>
-      </div>
-      <div class="swap-wrapper">
-        <button class="swap-btn" id="swapBtn" aria-label="Swap units">⇄</button>
-      </div>
-      <div class="unit-box">
-        <label>TO</label>
-        <div class="input-group">
-          <input type="text" id="resultDisplay" readonly placeholder="Converted value" style="background:#f2f6fc; color:#0f2b3b; font-weight:600;">
-          <select id="toUnit"></select>
-        </div>
-      </div>
-    </div>
-
-    <div class="result-area">
-      <span class="result-label">📐 CONVERTED RESULT</span>
-      <div>
-        <span class="result-value" id="liveResult">0.00</span>
-        <span class="result-unit" id="resultUnitLabel">—</span>
       </div>
     </div>
   </div>
-  <div class="converter-footer">
-    ⚡ Real-time conversion · High precision · Supports 20+ units
+
+  <!-- ========================= DATA TAB ========================= -->
+  <div id="dataTab" class="tab-content">
+    <div class="drop-zone" id="dataDropZone">
+      <div class="icon">📊📄</div>
+      <p>Upload CSV, JSON or XML file → convert to any target format</p>
+      <p style="font-size: 0.7rem;">Supports: CSV ↔ JSON ↔ XML (basic structure)</p>
+      <input type="file" id="dataFileInput" accept=".csv,.json,.xml,text/csv,application/json,text/xml" class="file-input-hidden">
+    </div>
+
+    <div class="flex-row">
+      <div class="preview-box">
+        <div class="preview-title">📄 SOURCE PREVIEW (first 500 chars)</div>
+        <div id="dataPreview" class="data-preview">No file loaded</div>
+        <div style="margin-top: 8px; font-size:0.7rem;">Detected format: <strong id="detectedFormat">—</strong></div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-title">🎯 TARGET CONVERSION</div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label>Convert to:</label>
+            <select id="targetDataFormat">
+              <option value="json">JSON (.json)</option>
+              <option value="csv">CSV (.csv)</option>
+              <option value="xml">XML (.xml)</option>
+            </select>
+          </div>
+          <button class="convert-btn" id="convertDataBtn">⚡ Convert & Download</button>
+          <div class="preview-title" style="margin-top: 5px;">✨ Converted preview</div>
+          <div id="convertedDataPreview" class="data-preview" style="max-height: 150px;">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================= TEXT / HTML TAB ========================= -->
+  <div id="textTab" class="tab-content">
+    <div class="drop-zone" id="textDropZone">
+      <div class="icon">📝📜</div>
+      <p>Upload TXT, HTML or any text file → convert to HTML / plain text</p>
+      <p style="font-size: 0.7rem;">Text ↔ HTML (wrap in &lt;pre&gt; or render as web page)</p>
+      <input type="file" id="textFileInput" accept=".txt,.html,.htm,text/plain,text/html" class="file-input-hidden">
+    </div>
+
+    <div class="flex-row">
+      <div class="preview-box">
+        <div class="preview-title">📄 SOURCE TEXT</div>
+        <div id="textSourcePreview" class="data-preview" style="max-height: 220px;">No text loaded</div>
+      </div>
+      <div class="preview-box">
+        <div class="preview-title">🔁 CONVERSION OPTIONS</div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div>
+            <label>Output format:</label>
+            <select id="textOutputFormat">
+              <option value="plain">Plain Text (.txt)</option>
+              <option value="html">HTML Document (.html)</option>
+            </select>
+          </div>
+          <button class="convert-btn" id="convertTextBtn">📄 Convert & Download</button>
+          <div class="preview-title">📎 Result preview</div>
+          <div id="textResultPreview" class="data-preview" style="max-height: 150px;">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-meta">
+    ⚡ Client-side conversion · Privacy-first · Supports image resize & quality · CSV ↔ JSON ↔ XML parser
   </div>
 </div>
 
 <script>
-  // ----------------------------- DATA DEFINITIONS ---------------------------------
-  // Length units (base = meter)
-  const lengthUnits = [
-    { key: "mm", name: "Millimeter (mm)" },
-    { key: "cm", name: "Centimeter (cm)" },
-    { key: "m", name: "Meter (m)" },
-    { key: "km", name: "Kilometer (km)" },
-    { key: "in", name: "Inch (in)" },
-    { key: "ft", name: "Foot (ft)" },
-    { key: "yd", name: "Yard (yd)" },
-    { key: "mi", name: "Mile (mi)" }
-  ];
-  const lengthFactors = {
-    mm: 0.001, cm: 0.01, m: 1, km: 1000,
-    in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344
-  };
-
-  // Mass (Weight) units (base = kilogram)
-  const weightUnits = [
-    { key: "mg", name: "Milligram (mg)" },
-    { key: "g", name: "Gram (g)" },
-    { key: "kg", name: "Kilogram (kg)" },
-    { key: "lb", name: "Pound (lb)" },
-    { key: "oz", name: "Ounce (oz)" },
-    { key: "t", name: "Metric Ton (t)" }
-  ];
-  const weightFactors = {
-    mg: 0.000001, g: 0.001, kg: 1, lb: 0.45359237, oz: 0.028349523125, t: 1000
-  };
-
-  // Volume units (base = liter)
-  const volumeUnits = [
-    { key: "ml", name: "Milliliter (mL)" },
-    { key: "l", name: "Liter (L)" },
-    { key: "gal", name: "Gallon (US gal)" },
-    { key: "qt", name: "Quart (qt)" },
-    { key: "pt", name: "Pint (pt)" },
-    { key: "cup", name: "Cup (cup)" }
-  ];
-  const volumeFactors = {
-    ml: 0.001, l: 1, gal: 3.785411784, qt: 0.946352946, pt: 0.473176473, cup: 0.2365882365
-  };
-
-  // Temperature units
-  const temperatureUnits = [
-    { key: "C", name: "Celsius (°C)" },
-    { key: "F", name: "Fahrenheit (°F)" },
-    { key: "K", name: "Kelvin (K)" }
-  ];
-
-  // master category config
-  const categories = {
-    length: {
-      name: "Length",
-      units: lengthUnits,
-      factorMap: lengthFactors,
-      isTemperature: false
-    },
-    weight: {
-      name: "Mass",
-      units: weightUnits,
-      factorMap: weightFactors,
-      isTemperature: false
-    },
-    volume: {
-      name: "Volume",
-      units: volumeUnits,
-      factorMap: volumeFactors,
-      isTemperature: false
-    },
-    temperature: {
-      name: "Temperature",
-      units: temperatureUnits,
-      factorMap: null,
-      isTemperature: true
+  (function() {
+    // ----------------------- TAB SWITCHING -----------------------
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    function switchTab(tabId) {
+      contents.forEach(content => content.classList.remove('active'));
+      document.getElementById(tabId + 'Tab').classList.add('active');
+      tabs.forEach(btn => {
+        const val = btn.getAttribute('data-tab');
+        if (val === tabId) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
     }
-  };
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        switchTab(tabId);
+      });
+    });
 
-  // ----------------------------- HELPER: TEMPERATURE CONVERSION -----------------
-  function convertTemperature(value, fromUnit, toUnit) {
-    if (fromUnit === toUnit) return value;
-    let celsius = 0;
-    // Convert to Celsius first
-    if (fromUnit === "C") celsius = value;
-    else if (fromUnit === "F") celsius = (value - 32) * 5 / 9;
-    else if (fromUnit === "K") celsius = value - 273.15;
-    else return NaN;
+    // ----------------------- IMAGE CONVERSION LOGIC -----------------------
+    let currentImageFile = null;
+    const imageDropZone = document.getElementById('imageDropZone');
+    const imageFileInput = document.getElementById('imageFileInput');
+    const originalImagePreview = document.getElementById('originalImagePreview');
+    const noImageText = document.getElementById('noImageText');
+    const convertImageBtn = document.getElementById('convertImageBtn');
+    const imageOutputFormat = document.getElementById('imageOutputFormat');
+    const imageQuality = document.getElementById('imageQuality');
+    const qualityValue = document.getElementById('qualityValue');
 
-    // Convert from Celsius to target
-    if (toUnit === "C") return celsius;
-    if (toUnit === "F") return (celsius * 9 / 5) + 32;
-    if (toUnit === "K") return celsius + 273.15;
-    return NaN;
-  }
+    imageQuality.addEventListener('input', () => {
+      qualityValue.textContent = Math.round(imageQuality.value * 100) + '%';
+    });
 
-  // ----------------------------- MAIN CONVERSION ENGINE -------------------------
-  function convertValue(value, fromKey, toKey, categoryId) {
-    if (isNaN(value) || value === null || value === "") return 0;
-    const numVal = parseFloat(value);
-    const category = categories[categoryId];
-    if (!category) return 0;
+    function triggerImageUpload() { imageFileInput.click(); }
+    imageDropZone.addEventListener('click', triggerImageUpload);
+    imageDropZone.addEventListener('dragover', (e) => { e.preventDefault(); imageDropZone.classList.add('drag-over'); });
+    imageDropZone.addEventListener('dragleave', () => { imageDropZone.classList.remove('drag-over'); });
+    imageDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      imageDropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) handleImageFile(file);
+      else alert('Please drop a valid image file.');
+    });
+    imageFileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleImageFile(e.target.files[0]); });
 
-    // temperature special branch
-    if (category.isTemperature) {
-      const result = convertTemperature(numVal, fromKey, toKey);
+    function handleImageFile(file) {
+      currentImageFile = file;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        originalImagePreview.src = ev.target.result;
+        originalImagePreview.style.display = 'block';
+        noImageText.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    convertImageBtn.addEventListener('click', () => {
+      if (!currentImageFile) { alert('Please upload an image first.'); return; }
+      const format = imageOutputFormat.value;  // mime type
+      const quality = parseFloat(imageQuality.value);
+      const img = new Image();
+      const url = URL.createObjectURL(currentImageFile);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        let mime = format;
+        let ext = mime.split('/')[1];
+        if (ext === 'jpeg') ext = 'jpg';
+        let dataURL = '';
+        if (mime === 'image/jpeg' || mime === 'image/webp') {
+          dataURL = canvas.toDataURL(mime, quality);
+        } else {
+          dataURL = canvas.toDataURL(mime);
+        }
+        const link = document.createElement('a');
+        link.download = `converted_image.${ext}`;
+        link.href = dataURL;
+        link.click();
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    });
+
+    // ----------------------- DATA CONVERSION (CSV/JSON/XML) -----------------------
+    let currentDataFile = null;
+    let currentDataRawText = '';
+    let detectedSourceFormat = '';
+    const dataDropZone = document.getElementById('dataDropZone');
+    const dataFileInput = document.getElementById('dataFileInput');
+    const dataPreviewDiv = document.getElementById('dataPreview');
+    const detectedFormatSpan = document.getElementById('detectedFormat');
+    const convertDataBtn = document.getElementById('convertDataBtn');
+    const targetDataFormat = document.getElementById('targetDataFormat');
+    const convertedDataPreview = document.getElementById('convertedDataPreview');
+
+    function triggerDataUpload() { dataFileInput.click(); }
+    dataDropZone.addEventListener('click', triggerDataUpload);
+    dataDropZone.addEventListener('dragover', (e) => { e.preventDefault(); dataDropZone.classList.add('drag-over'); });
+    dataDropZone.addEventListener('dragleave', () => { dataDropZone.classList.remove('drag-over'); });
+    dataDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dataDropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && (file.name.endsWith('.csv') || file.name.endsWith('.json') || file.name.endsWith('.xml'))) handleDataFile(file);
+      else alert('Please upload CSV, JSON or XML file.');
+    });
+    dataFileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleDataFile(e.target.files[0]); });
+
+    function detectFormatFromName(name, content) {
+      const lower = name.toLowerCase();
+      if (lower.endsWith('.csv')) return 'csv';
+      if (lower.endsWith('.json')) return 'json';
+      if (lower.endsWith('.xml')) return 'xml';
+      // fallback content detection
+      if (content.trim().startsWith('{') || content.trim().startsWith('[')) return 'json';
+      if (content.trim().startsWith('<')) return 'xml';
+      if (content.includes(',')) return 'csv';
+      return 'unknown';
+    }
+
+    // Simple CSV to JSON (handles headers)
+    function csvToJSON(csvStr) {
+      const lines = csvStr.trim().split(/\r?\n/);
+      if (lines.length < 1) return [];
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      const result = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = values[idx] || ''; });
+        result.push(obj);
+      }
       return result;
     }
 
-    // length, weight, volume: factor-based conversion
-    const factorMap = category.factorMap;
-    if (!factorMap[fromKey] || !factorMap[toKey]) return 0;
-    const baseValue = numVal * factorMap[fromKey];
-    const result = baseValue / factorMap[toKey];
-    return result;
-  }
+    function jsonToCSV(jsonObj) {
+      if (!Array.isArray(jsonObj) || jsonObj.length === 0) return '';
+      const headers = Object.keys(jsonObj[0]);
+      const rows = [headers.join(',')];
+      for (const item of jsonObj) {
+        const row = headers.map(h => {
+          let val = item[h] !== undefined ? item[h] : '';
+          if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) val = `"${val.replace(/"/g, '""')}"`;
+          return val;
+        }).join(',');
+        rows.push(row);
+      }
+      return rows.join('\n');
+    }
 
-  // ----------------------------- UI STATE & DYNAMIC RENDERING -------------------
-  let currentCategory = "length";   // default
+    function jsonToXML(jsonObj, rootName = 'root') {
+      if (typeof jsonObj !== 'object') return `<${rootName}>${jsonObj}</${rootName}>`;
+      if (Array.isArray(jsonObj)) {
+        let xml = `<${rootName}>`;
+        jsonObj.forEach(item => { xml += jsonToXML(item, 'item'); });
+        xml += `</${rootName}>`;
+        return xml;
+      }
+      let xml = `<${rootName}>`;
+      for (let key in jsonObj) {
+        if (jsonObj.hasOwnProperty(key)) {
+          xml += jsonToXML(jsonObj[key], key);
+        }
+      }
+      xml += `</${rootName}>`;
+      return xml;
+    }
 
-  // DOM elements
-  const categoryBtns = document.querySelectorAll(".cat-btn");
-  const fromUnitSelect = document.getElementById("fromUnit");
-  const toUnitSelect = document.getElementById("toUnit");
-  const inputValueElem = document.getElementById("inputValue");
-  const resultDisplay = document.getElementById("resultDisplay");
-  const liveResultSpan = document.getElementById("liveResult");
-  const resultUnitLabel = document.getElementById("resultUnitLabel");
-  const swapBtn = document.getElementById("swapBtn");
+    function parseXMLToJson(xmlStr) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlStr, "text/xml");
+      function walk(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node.nodeValue.trim();
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const obj = {};
+          if (node.children.length === 0) return node.textContent.trim();
+          for (let child of node.children) {
+            const childVal = walk(child);
+            if (obj[child.tagName]) {
+              if (!Array.isArray(obj[child.tagName])) obj[child.tagName] = [obj[child.tagName]];
+              obj[child.tagName].push(childVal);
+            } else obj[child.tagName] = childVal;
+          }
+          return obj;
+        }
+        return null;
+      }
+      const root = xmlDoc.documentElement;
+      const result = {};
+      result[root.tagName] = walk(root);
+      return result;
+    }
 
-  // helper: populate unit dropdowns based on current category
-  function populateUnitSelects() {
-    const categoryData = categories[currentCategory];
-    if (!categoryData) return;
-    const unitsList = categoryData.units;
+    function handleDataFile(file) {
+      currentDataFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentDataRawText = e.target.result;
+        detectedSourceFormat = detectFormatFromName(file.name, currentDataRawText);
+        detectedFormatSpan.textContent = detectedSourceFormat.toUpperCase();
+        let preview = currentDataRawText.slice(0, 500);
+        dataPreviewDiv.textContent = preview + (currentDataRawText.length > 500 ? '...' : '');
+        convertedDataPreview.textContent = '— select target and click convert —';
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
 
-    // preserve currently selected values if possible (or fallback)
-    const oldFromVal = fromUnitSelect.value;
-    const oldToVal = toUnitSelect.value;
+    function performDataConversion() {
+      if (!currentDataRawText) { alert('Please upload a data file first.'); return; }
+      const target = targetDataFormat.value;
+      let convertedText = '';
+      let error = false;
+      try {
+        if (detectedSourceFormat === 'csv') {
+          const jsonData = csvToJSON(currentDataRawText);
+          if (target === 'json') convertedText = JSON.stringify(jsonData, null, 2);
+          else if (target === 'csv') convertedText = currentDataRawText;
+          else if (target === 'xml') convertedText = jsonToXML(jsonData, 'data');
+        } 
+        else if (detectedSourceFormat === 'json') {
+          const jsonObj = JSON.parse(currentDataRawText);
+          if (target === 'json') convertedText = JSON.stringify(jsonObj, null, 2);
+          else if (target === 'csv') {
+            const arr = Array.isArray(jsonObj) ? jsonObj : [jsonObj];
+            convertedText = jsonToCSV(arr);
+          } else if (target === 'xml') convertedText = jsonToXML(jsonObj, 'root');
+        }
+        else if (detectedSourceFormat === 'xml') {
+          const jsonObj = parseXMLToJson(currentDataRawText);
+          if (target === 'json') convertedText = JSON.stringify(jsonObj, null, 2);
+          else if (target === 'csv') {
+            const rootKey = Object.keys(jsonObj)[0];
+            const data = jsonObj[rootKey];
+            const arr = Array.isArray(data) ? data : (data && typeof data === 'object' ? [data] : []);
+            convertedText = jsonToCSV(arr);
+          } else if (target === 'xml') convertedText = currentDataRawText;
+        }
+        else {
+          alert('Unsupported or unknown source format. Please use CSV, JSON, or XML.');
+          error = true;
+        }
+        if (!error) {
+          convertedDataPreview.textContent = convertedText.slice(0, 400) + (convertedText.length > 400 ? '...' : '');
+          const blob = new Blob([convertedText], {type: 'text/plain'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          let ext = target;
+          if (target === 'json') ext = 'json';
+          else if (target === 'csv') ext = 'csv';
+          else ext = 'xml';
+          a.download = `converted_data.${ext}`;
+          a.href = url;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      } catch(err) {
+        alert('Conversion error: ' + err.message);
+      }
+    }
+    convertDataBtn.addEventListener('click', performDataConversion);
 
-    // rebuild fromUnit
-    fromUnitSelect.innerHTML = "";
-    toUnitSelect.innerHTML = "";
-    unitsList.forEach(unit => {
-      const optionFrom = document.createElement("option");
-      optionFrom.value = unit.key;
-      optionFrom.textContent = unit.name;
-      fromUnitSelect.appendChild(optionFrom);
+    // ----------------------- TEXT / HTML CONVERSION -----------------------
+    let currentTextContent = '';
+    const textDropZone = document.getElementById('textDropZone');
+    const textFileInput = document.getElementById('textFileInput');
+    const textSourcePreview = document.getElementById('textSourcePreview');
+    const textOutputFormatSel = document.getElementById('textOutputFormat');
+    const convertTextBtn = document.getElementById('convertTextBtn');
+    const textResultPreview = document.getElementById('textResultPreview');
 
-      const optionTo = document.createElement("option");
-      optionTo.value = unit.key;
-      optionTo.textContent = unit.name;
-      toUnitSelect.appendChild(optionTo);
+    function triggerTextUpload() { textFileInput.click(); }
+    textDropZone.addEventListener('click', triggerTextUpload);
+    textDropZone.addEventListener('dragover', (e) => { e.preventDefault(); textDropZone.classList.add('drag-over'); });
+    textDropZone.addEventListener('dragleave', () => { textDropZone.classList.remove('drag-over'); });
+    textDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      textDropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && (file.type === 'text/plain' || file.type === 'text/html' || file.name.endsWith('.txt') || file.name.endsWith('.html'))) handleTextFile(file);
+      else alert('Please upload a text file (.txt, .html)');
+    });
+    textFileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleTextFile(e.target.files[0]); });
+
+    function handleTextFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentTextContent = e.target.result;
+        textSourcePreview.textContent = currentTextContent.slice(0, 500) + (currentTextContent.length > 500 ? '...' : '');
+        textResultPreview.textContent = '— ready —';
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    convertTextBtn.addEventListener('click', () => {
+      if (!currentTextContent) { alert('Please load a text file first.'); return; }
+      const targetType = textOutputFormatSel.value;
+      let output = '';
+      let mime = 'text/plain';
+      let ext = 'txt';
+      if (targetType === 'plain') {
+        output = currentTextContent;
+        mime = 'text/plain';
+        ext = 'txt';
+      } else if (targetType === 'html') {
+        output = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Converted Document</title></head><body><pre>${escapeHtml(currentTextContent)}</pre></body></html>`;
+        mime = 'text/html';
+        ext = 'html';
+      }
+      textResultPreview.textContent = output.slice(0, 300) + (output.length > 300 ? '...' : '');
+      const blob = new Blob([output], {type: mime});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.download = `converted_text.${ext}`;
+      a.href = url;
+      a.click();
+      URL.revokeObjectURL(url);
     });
 
-    // smart restore: if old value exists in new unit set, keep it, else use defaults
-    const availableKeys = unitsList.map(u => u.key);
-    if (availableKeys.includes(oldFromVal)) {
-      fromUnitSelect.value = oldFromVal;
-    } else {
-      // default: first unit (or specific for each category)
-      if (currentCategory === "length") fromUnitSelect.value = "m";
-      else if (currentCategory === "weight") fromUnitSelect.value = "kg";
-      else if (currentCategory === "temperature") fromUnitSelect.value = "C";
-      else if (currentCategory === "volume") fromUnitSelect.value = "l";
-      else fromUnitSelect.value = availableKeys[0];
-    }
-
-    if (availableKeys.includes(oldToVal)) {
-      toUnitSelect.value = oldToVal;
-    } else {
-      if (currentCategory === "length") toUnitSelect.value = "ft";
-      else if (currentCategory === "weight") toUnitSelect.value = "lb";
-      else if (currentCategory === "temperature") toUnitSelect.value = "F";
-      else if (currentCategory === "volume") toUnitSelect.value = "gal";
-      else toUnitSelect.value = availableKeys[1] || availableKeys[0];
-    }
-
-    // edge case: ensure both selects have a valid selected index
-    if (!fromUnitSelect.value) fromUnitSelect.value = availableKeys[0];
-    if (!toUnitSelect.value) toUnitSelect.value = availableKeys[1] || availableKeys[0];
-
-    updateResultUnitLabel();
-  }
-
-  // update the label that shows the target unit name next to result
-  function updateResultUnitLabel() {
-    const categoryData = categories[currentCategory];
-    if (!categoryData) return;
-    const targetUnitKey = toUnitSelect.value;
-    const unitObj = categoryData.units.find(u => u.key === targetUnitKey);
-    if (unitObj) {
-      // extract short unit code for display
-      let shortCode = targetUnitKey;
-      if (currentCategory === "temperature") {
-        if (targetUnitKey === "C") shortCode = "°C";
-        else if (targetUnitKey === "F") shortCode = "°F";
-        else if (targetUnitKey === "K") shortCode = "K";
-      } else {
-        shortCode = targetUnitKey;
-      }
-      resultUnitLabel.textContent = shortCode;
-    } else {
-      resultUnitLabel.textContent = targetUnitKey;
-    }
-  }
-
-  // core: compute conversion and update all result fields
-  function updateConversion() {
-    let rawValue = inputValueElem.value;
-    if (rawValue === "") rawValue = "0";
-    let numericValue = parseFloat(rawValue);
-    if (isNaN(numericValue)) numericValue = 0;
-
-    const fromUnit = fromUnitSelect.value;
-    const toUnit = toUnitSelect.value;
-
-    if (!fromUnit || !toUnit) return;
-
-    let converted = convertValue(numericValue, fromUnit, toUnit, currentCategory);
-    if (isNaN(converted)) converted = 0;
-
-    // formatting: show up to 8 decimal places, trim trailing zeros but keep readable
-    let formatted;
-    if (Math.abs(converted) < 0.000001 && converted !== 0) {
-      formatted = converted.toExponential(8);
-    } else {
-      formatted = parseFloat(converted.toFixed(10)).toString();
-      // if it's a whole number, avoid scientific, just show clean
-      if (formatted.includes("e")) formatted = converted.toFixed(8);
-      else if (formatted.length > 16) formatted = converted.toFixed(8);
-    }
-    // remove trailing .0 if integer-looking but keep precision
-    if (formatted.endsWith(".0") && !formatted.includes("e")) formatted = formatted.slice(0, -2);
-    liveResultSpan.textContent = formatted;
-    resultDisplay.value = formatted;
-    updateResultUnitLabel();
-  }
-
-  // rebuild UI when category changes
-  function setCategory(categoryId) {
-    if (!categories[categoryId]) return;
-    currentCategory = categoryId;
-    // update active tab UI
-    categoryBtns.forEach(btn => {
-      if (btn.dataset.cat === categoryId) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
-    });
-    // rebuild dropdowns with new unit set
-    populateUnitSelects();
-    // after new units, refresh conversion
-    updateConversion();
-  }
-
-  // swap from <-> to units and recalc
-  function swapUnits() {
-    const fromVal = fromUnitSelect.value;
-    const toVal = toUnitSelect.value;
-    if (fromVal && toVal) {
-      fromUnitSelect.value = toVal;
-      toUnitSelect.value = fromVal;
-      updateConversion();
-    }
-  }
-
-  // event listeners for real-time updates
-  function attachEvents() {
-    inputValueElem.addEventListener("input", () => updateConversion());
-    fromUnitSelect.addEventListener("change", () => updateConversion());
-    toUnitSelect.addEventListener("change", () => updateConversion());
-    swapBtn.addEventListener("click", () => swapUnits());
-
-    categoryBtns.forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const cat = btn.dataset.cat;
-        if (cat) setCategory(cat);
+    function escapeHtml(str) {
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
       });
-    });
-  }
-
-  // extra: initial setup and default unit naming sync
-  function init() {
-    attachEvents();
-    setCategory("length");   // start with length (meter -> feet)
-    // set default example value
-    inputValueElem.value = "1.0";
-    updateConversion();
-  }
-
-  // launch everything
-  init();
+    }
+  })();
 </script>
 </body>
 </html>
