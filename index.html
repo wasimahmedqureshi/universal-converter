@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Universal Converter Pro | DOCX to PDF · Excel to PDF · MP4 to MP3</title>
+  <title>Universal Converter Pro | Hindi DOCX to PDF Fixed</title>
   <!-- Core libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -47,8 +47,8 @@
 <body>
 <div class="app-container">
   <header>
-    <h1>⚡ Universal Converter <span class="badge">Pro Suite</span></h1>
-    <div class="sub">DOCX → PDF · Excel → PDF · Image → PDF · MP4 → MP3 · GIF Studio</div>
+    <h1>⚡ Universal Converter <span class="badge">Hindi DOCX Support</span></h1>
+    <div class="sub">DOCX → PDF (Hindi font fixed) · Excel → PDF · Image → PDF · MP4 → MP3 · GIF Studio</div>
   </header>
   <div class="tabs">
     <button class="tab-btn active" data-tab="image">🖼️ Image</button>
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <!-- PDF & Documents Tab (includes DOCX to PDF and Excel to PDF) -->
+  <!-- PDF & Documents Tab (DOCX to PDF with Hindi font fix) -->
   <div id="pdfTab" class="tab-content">
     <div class="drop-zone" id="pdfDropZone">📄 Drop file: PDF, DOCX, XLSX, JPG, PNG, HEIC</div>
     <input type="file" id="pdfInput" style="display:none" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png,.heic,.heif">
@@ -80,7 +80,7 @@
         <select id="pdfAction">
           <option value="pdfToJpg">📸 PDF to JPG (ZIP)</option>
           <option value="jpgToPdf">🖼️ Image to PDF (JPG/PNG/HEIC)</option>
-          <option value="docxToPdf">📝 DOCX to PDF</option>
+          <option value="docxToPdf">📝 DOCX to PDF (Hindi supported)</option>
           <option value="excelToPdf">📊 Excel (XLSX) to PDF</option>
           <option value="pdfToText">📝 PDF to Text</option>
         </select>
@@ -91,7 +91,7 @@
     </div>
   </div>
 
-  <!-- Video & Audio Tab (MP4 to MP3 added) -->
+  <!-- Video & Audio Tab -->
   <div id="videoTab" class="tab-content">
     <div class="drop-zone" id="videoDropZone">🎥 Drop video/audio (MP4, MOV, MP3, OGG)</div>
     <input type="file" id="videoInput" style="display:none" accept="video/mp4,video/quicktime,audio/mpeg,audio/ogg">
@@ -172,7 +172,7 @@
   });
   document.getElementById('imgQuality').addEventListener('input', e => document.getElementById('qualVal').innerText = Math.round(e.target.value*100)+'%');
 
-  // ---------------------- PDF & DOCUMENTS (DOCX to PDF, Excel to PDF) ----------------------
+  // ---------------------- PDF & DOCUMENTS (Hindi font fix for DOCX to PDF) ----------------------
   let currentDocFile = null;
   const pdfZone = document.getElementById('pdfDropZone');
   const pdfFileInput = document.getElementById('pdfInput');
@@ -182,7 +182,7 @@
   pdfZone.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if(f) { currentDocFile = f; showStatus(document.getElementById('pdfPreview'), `Dropped: ${f.name}`); } });
 
   async function htmlToPdf(htmlElement, filename) {
-    const canvas = await html2canvas(htmlElement, { scale: 2 });
+    const canvas = await html2canvas(htmlElement, { scale: 2, useCORS: true });
     const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: 'px', format: [canvas.width, canvas.height] });
@@ -229,19 +229,33 @@
     }
     else if (action === 'docxToPdf') {
       if (fileExt !== 'docx') { alert('Please upload a .docx file'); return; }
-      statusDiv.innerText = 'Converting DOCX to PDF...';
+      statusDiv.innerText = 'Converting DOCX to PDF with Hindi font support...';
       const arrayBuffer = await currentDocFile.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
+      // Create a container with proper font for Devanagari/Hindi
       const container = document.createElement('div');
       container.style.padding = '20px';
       container.style.backgroundColor = 'white';
       container.style.color = 'black';
-      container.style.fontFamily = 'Arial, sans-serif';
-      container.innerHTML = result.value;
+      // CRITICAL: Font stack that supports Hindi (Devanagari)
+      container.style.fontFamily = "'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Arial Unicode MS', 'Kohinoor Devanagari', 'Segoe UI', sans-serif";
+      container.style.fontSize = '14px';
+      container.style.lineHeight = '1.5';
+      container.innerHTML = `
+        <meta charset="UTF-8">
+        <style>
+          body, div, p, span, h1, h2, h3, h4, h5, h6, li, td, th {
+            font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Arial Unicode MS', 'Kohinoor Devanagari', sans-serif;
+          }
+        </style>
+        ${result.value}
+      `;
       document.body.appendChild(container);
+      // Wait a bit for fonts to render (if using web fonts, but system fonts should work)
+      await new Promise(r => setTimeout(r, 200));
       await htmlToPdf(container, 'docx_to_pdf.pdf');
       document.body.removeChild(container);
-      statusDiv.innerText = 'DOCX converted to PDF.';
+      statusDiv.innerText = 'DOCX converted to PDF with Hindi text support.';
     }
     else if (action === 'excelToPdf') {
       if (fileExt !== 'xlsx') { alert('Please upload an .xlsx file'); return; }
@@ -255,8 +269,8 @@
       container.style.padding = '20px';
       container.style.backgroundColor = 'white';
       container.style.color = 'black';
-      container.style.fontFamily = 'Arial, sans-serif';
-      container.innerHTML = html;
+      container.style.fontFamily = "'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Arial Unicode MS', sans-serif";
+      container.innerHTML = `<meta charset="UTF-8">${html}`;
       document.body.appendChild(container);
       await htmlToPdf(container, 'excel_to_pdf.pdf');
       document.body.removeChild(container);
