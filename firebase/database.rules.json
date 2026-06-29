@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "conversionQueue": {
+      "$jobId": {
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || root.child('admins/' + auth.uid).exists())",
+        ".write": "auth != null"
+      }
+    },
+    "history": {
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId"
+      }
+    },
+    "serverStatus": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins/' + auth.uid).exists()"
+    },
+    "analytics": {
+      ".read": "auth != null && root.child('admins/' + auth.uid).exists()",
+      ".write": "auth != null && root.child('admins/' + auth.uid).exists()"
+    },
+    "admins": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
